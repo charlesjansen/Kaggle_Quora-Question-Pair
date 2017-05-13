@@ -223,23 +223,24 @@ embedding_layer = Embedding(nb_words,
         weights=[embedding_matrix],
         input_length=MAX_SEQUENCE_LENGTH,
         trainable=False)
-lstm_layer0 = LSTM(num_lstm, dropout=rate_drop_lstm, recurrent_dropout=rate_drop_lstm, return_sequences=True)
-#lstm_layer = LSTM(num_lstm, dropout=rate_drop_lstm, recurrent_dropout=rate_drop_lstm, return_sequences=True)
-lstm_layer1 = LSTM(num_lstm, dropout=rate_drop_lstm, recurrent_dropout=rate_drop_lstm)
+#lstm_layer0 = LSTM(num_lstm, dropout=rate_drop_lstm, recurrent_dropout=rate_drop_lstm, return_sequences=True)
+lstm_layer = LSTM(num_lstm, dropout=rate_drop_lstm, recurrent_dropout=rate_drop_lstm)
+#lstm_layer1 = LSTM(num_lstm, dropout=rate_drop_lstm, recurrent_dropout=rate_drop_lstm)
 #lstm_layer = Bidirectional(GRU(num_lstm, return_sequences=True))
 
 
 sequence_1_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
 embedded_sequences_1 = embedding_layer(sequence_1_input)
-x1 = lstm_layer0(embedded_sequences_1)
-x2 = lstm_layer1(x1)
+x1 = lstm_layer(embedded_sequences_1)
+#x2 = lstm_layer1(x1)
 
 sequence_2_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
 embedded_sequences_2 = embedding_layer(sequence_2_input)
-y1 = lstm_layer0(embedded_sequences_2)
-y2 = lstm_layer1(y1)
+y1 = lstm_layer(embedded_sequences_2)
+#y2 = lstm_layer1(y1)
 
-merged = concatenate([x2, y2])
+merged = concatenate([x1, y1])
+#Imerged = concatenate([x2, y2])
 merged = Dropout(rate_drop_dense)(merged)
 merged = BatchNormalization()(merged)
 
@@ -298,7 +299,7 @@ submission.to_csv('%.4f_'%(bst_val_score)+STAMP+'.csv', index=False)
 #lstm               val 2656 LB 30527 WINNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNER
 #bidirc gru:        val 3047 LB 31597
 #lstm with capital: val2679 LB 30841
-#2lstm                                      (back to tolower)
+#2lstm              val 2763   LB  31858                                   (back to tolower)
 
 
 #next step: try stack lstm, try with more neuron, try with more dense layer, try with gensim, try with more rnn tipo deepnet
