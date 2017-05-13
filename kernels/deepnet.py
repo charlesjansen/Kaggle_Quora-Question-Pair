@@ -34,7 +34,7 @@ print(len(word_index))
 ytrain_enc = np_utils.to_categorical(y)
 
 embeddings_index = {}
-f = open('F:/DS-main/BigFiles/glove.840B.300d/glove.840B.300d.txt')
+f = open('F:/DS-main/BigFiles/glove.840B.300d/glove.840B.300d.txt', encoding="utf8")
 for line in tqdm(f):
     values = line.split()
     word = values[0]
