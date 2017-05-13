@@ -1,0 +1,3 @@
+https://kaggle2.blob.core.windows.net/competitions-data/kaggle/6277/test.csv.zip?sv=2015-12-11&sr=b&sig=i2CmfKk8S4vbF%2F62%2BG%2Br8fxE5SxKO2ZuHSW12gVlmVM%3D&se=2017-05-05T12%3A16%3A31Z&sp=r
+
+https://kaggle2.blob.core.windows.net/competitions-data/kaggle/6277/train.csv.zip?sv=2015-12-11&sr=b&sig=ipUiHf6eH9uAdHHJJJXSXOYAjCxbNiQRNYRf0Rd95EY%3D&se=2017-05-05T12%3A18%3A59Z&sp=r

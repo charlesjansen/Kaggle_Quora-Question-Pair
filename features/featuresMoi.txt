@@ -1,0 +1,13 @@
+exact same token? (different order)
+amount of different token in 2 that are not in 1
+amount of different token in 1 that are not in 2
+total amount of different tokens
+dummy variables "question1 start with": Why, How, What, Is/Are, Have, Does, Do, If, Will/Would, Can, Which, who
+dummy variables "question2 start with": idem arriba
+shape of the question
+
+Done
+
+count entities p1 (1 columns each)
+count entities p2 (1 columns each)
+
