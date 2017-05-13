@@ -1,0 +1,2 @@
+original from kaggle                                  LB  0.32861
+[314]   train-logloss:0.240887  eval-logloss:0.247289 LB  0.23179      avec magic features

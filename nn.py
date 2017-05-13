@@ -275,7 +275,7 @@ model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_wei
 
 hist = model.fit([data_1_train, data_2_train], labels_train, \
         validation_data=([data_1_val, data_2_val], labels_val, weight_val), \
-        epochs=200, batch_size=128, shuffle=True, \
+        epochs=200, batch_size=512, shuffle=True, \
         class_weight=class_weight, callbacks=[early_stopping, model_checkpoint])
 
 model.load_weights(bst_model_path)
@@ -286,8 +286,8 @@ bst_val_score = min(hist.history['val_loss'])
 ########################################
 print('Start making the submission before fine-tuning')
 
-preds = model.predict([test_data_1, test_data_2], batch_size=256, verbose=1)
-preds += model.predict([test_data_2, test_data_1], batch_size=256, verbose=1)
+preds = model.predict([test_data_1, test_data_2], batch_size=512, verbose=1)
+preds += model.predict([test_data_2, test_data_1], batch_size=512, verbose=1)
 preds /= 2
 
 submission = pd.DataFrame({'test_id':test_ids, 'is_duplicate':preds.ravel()})
