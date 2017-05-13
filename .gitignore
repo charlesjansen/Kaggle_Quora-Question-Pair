@@ -1,4 +1,5 @@
 *.h5
 *.gz
+*.csv
 .ipnb_checkpoints
 floyd
