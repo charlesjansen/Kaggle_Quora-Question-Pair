@@ -32,6 +32,20 @@ train_abhis = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/
 test_abhis = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_featuresAbhis.csv', encoding = "ISO-8859-1", header=0) 
 df_abhis = pd.concat([train_abhis, test_abhis]) 
 
+#==============================================================================
+# #rnn 1 lstm
+# train_rnn1Lstm = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30Train.csv', header=0) 
+# test_rnn1Lstm = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30.csv', header=0) 
+# df_rnn1Lstm = pd.concat([train_rnn1Lstm, test_rnn1Lstm]) 
+#==============================================================================
+
+#==============================================================================
+# #rnn 1 GRU
+# train_rnn1GRU = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru_Train.csv', header=0) 
+# test_rnn1GRU = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru.csv', header=0) 
+# df_rnn1GRU = pd.concat([train_rnn1GRU, test_rnn1GRU]) 
+#==============================================================================
+
 print("all imported, starting to process")
 
 
@@ -154,6 +168,7 @@ df = pd.concat([df_train, df_test])
 df['word_shares'] = df.apply(word_shares, axis=1, raw=True)
 
 x = pd.DataFrame()
+print("stacking original features")
 
 x['word_match']       = df['word_shares'].apply(lambda x: float(x.split(':')[0]))
 x['word_match_2root'] = np.sqrt(x['word_match'])
@@ -192,12 +207,14 @@ x['duplicated'] = df.duplicated(['question1','question2']).astype(int)
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/32819
 #adding magic features
+print("Magic features")
 x['q1_freq'] = df_combine['q1_freq'] 
 x['q2_freq'] = df_combine['q2_freq']
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/31284
 #https://www.kaggle.com/c/quora-question-pairs/discussion/30224
 #adding Abhishek features
+print("Abhis features")
 x['common_words'] = df_abhis['common_words'] 
 x['fuzz_qratio'] = df_abhis['fuzz_qratio'] 
 x['fuzz_WRatio'] = df_abhis['fuzz_WRatio'] 
@@ -220,7 +237,19 @@ x['skew_q2vec'] = df_abhis['skew_q2vec']
 x['kur_q1vec'] = df_abhis['kur_q1vec'] 
 x['kur_q2vec'] = df_abhis['kur_q2vec'] 
 
+#==============================================================================
+# ##rnn 1 lstm
+# print("rnn features")
+# x['rnn1Lstm'] = df_rnn1Lstm['is_duplicate'] 
+#==============================================================================
 
+
+#==============================================================================
+# ##rnn 1 gru
+# print("rnn gru features")
+# x['rnn1GRU'] = df_rnn1GRU['is_duplicate'] 
+# 
+#==============================================================================
 
 
 add_word_count(x, df,'how')

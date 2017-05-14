@@ -292,6 +292,18 @@ preds /= 2
 
 submission = pd.DataFrame({'test_id':test_ids, 'is_duplicate':preds.ravel()})
 submission.to_csv('%.4f_'%(bst_val_score)+STAMP+'.csv', index=False)
+
+#submitting training data to merge on xgboost as a feature
+preds = model.predict([data_1, data_2], batch_size=512, verbose=1)
+preds += model.predict([data_2, data_1], batch_size=512, verbose=1)
+preds /= 2
+
+submission = pd.DataFrame({'is_duplicate':preds.ravel()})
+submission.to_csv('%.4f_'%(bst_val_score)+STAMP+'Train.csv', index=False)
+
+
+
+
 # -*- coding: utf-8 -*-
 #********************************************************************************************************************************
 
