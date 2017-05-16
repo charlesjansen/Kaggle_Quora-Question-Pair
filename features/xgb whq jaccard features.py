@@ -3,21 +3,12 @@
 
 import numpy as np
 import pandas as pd
-import xgboost as xgb
-import datetime
-import operator
-from sklearn.model_selection import train_test_split
 from collections import Counter
 from nltk.corpus import stopwords
-import matplotlib.pyplot as plt
-from pylab import plot, show, subplot, specgram, imshow, savefig
 
-RS = 12357
-ROUNDS = 315
 
-print("Started")
-np.random.seed(RS)
 input_folder = 'F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/'
+
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/32819
 #adding magic features
@@ -37,9 +28,6 @@ df_abhis = pd.concat([train_abhis, test_abhis])
 # train_rnn1Lstm = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30Train.csv', header=0) 
 # test_rnn1Lstm = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30.csv', header=0) 
 # df_rnn1Lstm = pd.concat([train_rnn1Lstm, test_rnn1Lstm]) 
-#==============================================================================
-
-#==============================================================================
 # #rnn 1 GRU
 # train_rnn1GRU = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru_Train.csv', header=0) 
 # test_rnn1GRU = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru.csv', header=0) 
@@ -49,42 +37,13 @@ df_abhis = pd.concat([train_abhis, test_abhis])
 print("all imported, starting to process")
 
 
-
-
-def train_xgb(X, y, params):
-	print("Will train XGB for {} rounds, RandomSeed: {}".format(ROUNDS, RS))
-	x, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=RS)
-
-	xg_train = xgb.DMatrix(x, label=y_train)
-	xg_val = xgb.DMatrix(X_val, label=y_val)
-
-	watchlist  = [(xg_train,'train'), (xg_val,'eval')]
-	return xgb.train(params, xg_train, ROUNDS, watchlist)
-
-def predict_xgb(clr, X_test):
-	return clr.predict(xgb.DMatrix(X_test))
-
-def create_feature_map(features):
-	outfile = open('xgb.fmap', 'w')
-	i = 0
-	for feat in features:
-		outfile.write('{0}\t{1}\tq\n'.format(i, feat))
-		i = i + 1
-	outfile.close()
-
 def add_word_count(x, df, word):
 	x['q1_' + word] = df['question1'].apply(lambda x: (word in str(x).lower())*1)
 	x['q2_' + word] = df['question2'].apply(lambda x: (word in str(x).lower())*1)
 	x[word + '_both'] = x['q1_' + word] * x['q2_' + word]
 
 
-params = {}
-params['objective'] = 'binary:logistic'
-params['eval_metric'] = 'logloss'
-params['eta'] = 0.11
-params['max_depth'] = 5
-params['silent'] = 1
-params['seed'] = RS
+
 
 df_train = pd.read_csv(input_folder + 'train.csv')
 df_test  = pd.read_csv(input_folder + 'test.csv')
@@ -169,142 +128,160 @@ df['word_shares'] = df.apply(word_shares, axis=1, raw=True)
 
 x = pd.DataFrame()
 print("stacking original features")
-
+print("x word_match")
 x['word_match']       = df['word_shares'].apply(lambda x: float(x.split(':')[0]))
+print("x word_match_2root")
 x['word_match_2root'] = np.sqrt(x['word_match'])
+print("x tfidf_word_match")
 x['tfidf_word_match'] = df['word_shares'].apply(lambda x: float(x.split(':')[1]))
+print("x shared_count")
 x['shared_count']     = df['word_shares'].apply(lambda x: float(x.split(':')[2]))
 
+print("x stops1_ratio")
 x['stops1_ratio']     = df['word_shares'].apply(lambda x: float(x.split(':')[3]))
+print("x stops2_ratio")
 x['stops2_ratio']     = df['word_shares'].apply(lambda x: float(x.split(':')[4]))
+print("x shared_2gram")
 x['shared_2gram']     = df['word_shares'].apply(lambda x: float(x.split(':')[5]))
+print("x cosine")
 x['cosine']           = df['word_shares'].apply(lambda x: float(x.split(':')[6]))
+print("x words_hamming")
 x['words_hamming']    = df['word_shares'].apply(lambda x: float(x.split(':')[7]))
+print("x diff_stops_r")
 x['diff_stops_r']     = x['stops1_ratio'] - x['stops2_ratio']
 
+print("x len_q1")
 x['len_q1'] = df['question1'].apply(lambda x: len(str(x)))
+print("x len_q2")
 x['len_q2'] = df['question2'].apply(lambda x: len(str(x)))
+print("x diff_len")
 x['diff_len'] = x['len_q1'] - x['len_q2']
 
+print("x caps_count_q1")
 x['caps_count_q1'] = df['question1'].apply(lambda x:sum(1 for i in str(x) if i.isupper()))
+print("x caps_count_q2")
 x['caps_count_q2'] = df['question2'].apply(lambda x:sum(1 for i in str(x) if i.isupper()))
+print("x diff_caps")
 x['diff_caps'] = x['caps_count_q1'] - x['caps_count_q2']
 
+print("x len_char_q1")
 x['len_char_q1'] = df['question1'].apply(lambda x: len(str(x).replace(' ', '')))
+print("x len_char_q2")
 x['len_char_q2'] = df['question2'].apply(lambda x: len(str(x).replace(' ', '')))
+print("x diff_len_char")
 x['diff_len_char'] = x['len_char_q1'] - x['len_char_q2']
 
+print("x len_word_q1")
 x['len_word_q1'] = df['question1'].apply(lambda x: len(str(x).split()))
+print("x len_word_q2")
 x['len_word_q2'] = df['question2'].apply(lambda x: len(str(x).split()))
+print("x diff_len_word")
 x['diff_len_word'] = x['len_word_q1'] - x['len_word_q2']
 
+print("x avg_world_len1")
 x['avg_world_len1'] = x['len_char_q1'] / x['len_word_q1']
+print("x avg_world_len2")
 x['avg_world_len2'] = x['len_char_q2'] / x['len_word_q2']
+print("x diff_avg_word")
 x['diff_avg_word'] = x['avg_world_len1'] - x['avg_world_len2']
 
+print("x exactly_same")
 x['exactly_same'] = (df['question1'] == df['question2']).astype(int)
+print("x duplicated")
 x['duplicated'] = df.duplicated(['question1','question2']).astype(int)
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/32819
 #adding magic features
 print("Magic features")
+print("x q1_freq")
 x['q1_freq'] = df_combine['q1_freq'] 
+print("x q2_freq")
 x['q2_freq'] = df_combine['q2_freq']
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/31284
 #https://www.kaggle.com/c/quora-question-pairs/discussion/30224
 #adding Abhishek features
 print("Abhis features")
+print("x common_words")
 x['common_words'] = df_abhis['common_words'] 
+print("x fuzz_qratio")
 x['fuzz_qratio'] = df_abhis['fuzz_qratio'] 
+print("x fuzz_WRatio")
 x['fuzz_WRatio'] = df_abhis['fuzz_WRatio'] 
+print("x fuzz_partial_ratio")
 x['fuzz_partial_ratio'] = df_abhis['fuzz_partial_ratio'] 
+print("x fuzz_partial_token_set_ratio")
 x['fuzz_partial_token_set_ratio'] = df_abhis['fuzz_partial_token_set_ratio'] 
+print("x fuzz_partial_token_sort_ratio")
 x['fuzz_partial_token_sort_ratio'] = df_abhis['fuzz_partial_token_sort_ratio'] 
+print("x fuzz_token_set_ratio")
 x['fuzz_token_set_ratio'] = df_abhis['fuzz_token_set_ratio'] 
+print("x fuzz_token_sort_ratio")
 x['fuzz_token_sort_ratio'] = df_abhis['fuzz_token_sort_ratio'] 
+print("x wmd")
 x['wmd'] = df_abhis['wmd'] 
+print("x norm_wmd")
 x['norm_wmd'] = df_abhis['norm_wmd'] 
+print("x cosine_distance")
 x['cosine_distance'] = df_abhis['cosine_distance'] 
+print("x cityblock_distance")
 x['cityblock_distance'] = df_abhis['cityblock_distance'] 
+print("x jaccard_distance")
 x['jaccard_distance'] = df_abhis['jaccard_distance'] 
+print("x canberra_distance")
 x['canberra_distance'] = df_abhis['canberra_distance'] 
+print("x euclidean_distance")
 x['euclidean_distance'] = df_abhis['euclidean_distance'] 
+print("x minkowski_distance")
 x['minkowski_distance'] = df_abhis['minkowski_distance'] 
+print("x braycurtis_distance")
 x['braycurtis_distance'] = df_abhis['braycurtis_distance'] 
+print("x skew_q1vec")
 x['skew_q1vec'] = df_abhis['skew_q1vec'] 
+print("x skew_q2vec")
 x['skew_q2vec'] = df_abhis['skew_q2vec'] 
+print("x kur_q1vec")
 x['kur_q1vec'] = df_abhis['kur_q1vec'] 
+print("x kur_q2vec")
 x['kur_q2vec'] = df_abhis['kur_q2vec'] 
 
-#==============================================================================
-# ##rnn 1 lstm
-# print("rnn features")
-# x['rnn1Lstm'] = df_rnn1Lstm['is_duplicate'] 
-#==============================================================================
 
-
-#==============================================================================
-# ##rnn 1 gru
-# print("rnn gru features")
-# x['rnn1GRU'] = df_rnn1GRU['is_duplicate'] 
-# 
-#==============================================================================
-
-
+print("x how")
 add_word_count(x, df,'how')
+print("x what")
 add_word_count(x, df,'what')
+print("x which")
 add_word_count(x, df,'which')
+print("x who")
 add_word_count(x, df,'who')
+print("x where")
 add_word_count(x, df,'where')
+print("x when")
 add_word_count(x, df,'when')
+print("x why")
 add_word_count(x, df,'why')
 
-print(x.columns)
-print(x.describe())
+x.to_csv("F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/x_final_features.csv", index=False)
 
-feature_names = list(x.columns.values)
-create_feature_map(feature_names)
-print("Features: {}".format(feature_names))
 
-x_train = x[:df_train.shape[0]]
-x_test  = x[df_train.shape[0]:]
-y_train = df_train['is_duplicate'].values
-del x, df_train
 
-if 1: # Now we oversample the negative class - on your own risk of overfitting!
-	pos_train = x_train[y_train == 1]
-	neg_train = x_train[y_train == 0]
 
-	print("Oversampling started for proportion: {}".format(len(pos_train) / (len(pos_train) + len(neg_train))))
-	p = 0.165
-	scale = ((len(pos_train) / (len(pos_train) + len(neg_train))) / p) - 1
-	while scale > 1:
-		neg_train = pd.concat([neg_train, neg_train])
-		scale -=1
-	neg_train = pd.concat([neg_train, neg_train[:int(scale * len(neg_train))]])
-	print("Oversampling done, new proportion: {}".format(len(pos_train) / (len(pos_train) + len(neg_train))))
 
-	x_train = pd.concat([pos_train, neg_train])
-	y_train = (np.zeros(len(pos_train)) + 1).tolist() + np.zeros(len(neg_train)).tolist()
-	del pos_train, neg_train
 
-print("Training data: X_train: {}, Y_train: {}, X_test: {}".format(x_train.shape, len(y_train), x_test.shape))
-clr = train_xgb(x_train, y_train, params)
-preds = predict_xgb(clr, x_test)
 
-print("Writing output...")
-sub = pd.DataFrame()
-sub['test_id'] = df_test['test_id']
-sub['is_duplicate'] = preds *.75
-sub.to_csv("xgb_seed{}_n{}.csv".format(RS, ROUNDS), index=False)
 
-print("Features importances...")
-importance = clr.get_fscore(fmap='xgb.fmap')
-importance = sorted(importance.items(), key=operator.itemgetter(1))
-ft = pd.DataFrame(importance, columns=['feature', 'fscore'])
 
-ft.plot(kind='barh', x='feature', y='fscore', legend=False, figsize=(10, 25))
-plt.gcf().savefig('features_importance.png')
 
-print("Done.")
+
+
+
+
+
+
+
+
+
+
+
+
+
