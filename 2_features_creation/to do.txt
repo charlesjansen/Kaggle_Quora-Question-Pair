@@ -1,0 +1,10 @@
+one only file to create the feature
+same preprocessing for all
+
+textacy for abrev
+lemmatizer, for verbs mainly (trying to get the english like chinese, no conj, no plur)
+gensim bigram trigram on top
+for features mainly (it might affect rnn with less matching for word2vec)
+
+spacy features
+more features

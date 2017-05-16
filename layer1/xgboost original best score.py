@@ -1,6 +1,22 @@
 # -*- coding: utf-8 -*-
 #https://www.kaggle.com/dasolmar/xgb-with-whq-jaccard/code/code
 
+#==============================================================================
+# Ensemble learning creation:
+# base_algorithms = [logistic_regression, decision_tree_classification, ...] #for classification
+# 
+# stacking_train_dataset = matrix(row_length=len(target), column_length=len(algorithms))
+# stacking_test_dataset = matrix(row_length=len(test), column_length=len(algorithms))
+# 
+# for i,base_algorithm in enumerate(base_algorithms):
+#     for trainix, testix in split(train, k=10): #you may use sklearn.cross_validation.KFold of sklearn library
+#         stacking_train_dataset[testix,i] = base_algorithm.fit(train[trainix], target[trainix]).predict(train[testix])
+#     stacking_test_dataset[,i] = base_algorithm.fit(train).predict(test)
+# 
+# 
+# final_predictions = combiner_algorithm.fit(stacking_train_dataset, target).predict(stacking_test_dataset)
+#==============================================================================
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -11,10 +27,8 @@ from nltk.corpus import stopwords
 import matplotlib.pyplot as plt
 from pylab import plot, show, subplot, specgram, imshow, savefig
 
-RS = 12357
-ROUNDS = 315
-
 print("Started")
+RS = 12357
 np.random.seed(RS)
 
 input_folder = 'F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/'
@@ -33,41 +47,22 @@ df_test  = pd.read_csv(input_folder + 'test.csv')
 # df_rnn1GRU = pd.concat([train_rnn1GRU, test_rnn1GRU]) 
 #==============================================================================
 
-
-
-
-#adding xgb whq javvard features (final x feature)
+#adding final x features
 x = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/x_final_features.csv', header=0) 
-
 
 #==============================================================================
 # ##rnn 1 lstm
 # print("rnn features")
 # x['rnn1Lstm'] = df_rnn1Lstm['is_duplicate'] 
-# 
-# 
 # ##rnn 1 gru
 # print("rnn gru features")
 # x['rnn1GRU'] = df_rnn1GRU['is_duplicate'] 
-# 
 #==============================================================================
-
-
-
-
-def create_feature_map(features):
-	outfile = open('xgb.fmap', 'w')
-	i = 0
-	for feat in features:
-		outfile.write('{0}\t{1}\tq\n'.format(i, feat))
-		i = i + 1
-	outfile.close()
 
 print(x.columns)
 print(x.describe())
 
 feature_names = list(x.columns.values)
-create_feature_map(feature_names)
 print("Features: {}".format(feature_names))
 
 x_train = x[:df_train.shape[0]]
@@ -76,6 +71,7 @@ y_train = df_train['is_duplicate'].values
 x_train_for_ensemble =  x_train
 y_train_for_ensemble =  y_train
 del x, df_train
+#params['scale_pos_weight'] = 0.360
 
 if 1: # Now we oversample the negative class - on your own risk of overfitting!
 	pos_train = x_train[y_train == 1]
@@ -97,12 +93,23 @@ if 1: # Now we oversample the negative class - on your own risk of overfitting!
 ####################################################################
 # XGBoost
 ####################################################################
+ratio = float(np.sum(y_train == 0)) / np.sum(y_train==1)
 
 print("Training data: X_train: {}, Y_train: {}, X_test: {}".format(x_train.shape, len(y_train), x_test.shape))
-
+ROUNDS = 1000
 #training
+def create_feature_map(features):
+	outfile = open('xgb.fmap', 'w')
+	i = 0
+	for feat in features:
+		outfile.write('{0}\t{1}\tq\n'.format(i, feat))
+		i = i + 1
+	outfile.close()
+create_feature_map(feature_names)
+
 print("Will train XGB for {} rounds, RandomSeed: {}".format(ROUNDS, RS))
 params = {}
+#?params['scale_pos_weight'] = ratio
 params['objective'] = 'binary:logistic'
 params['eval_metric'] = 'logloss'
 params['eta'] = 0.11
@@ -113,9 +120,9 @@ X_training, X_val, y_training, y_val = train_test_split(x_train, y_train, test_s
 xg_train = xgb.DMatrix(X_training, label=y_training)
 xg_val = xgb.DMatrix(X_val, label=y_val)
 watchlist  = [(xg_train,'train'), (xg_val,'eval')]
-clr = xgb.train(params, xg_train, ROUNDS, watchlist)
 
-#predict
+clr = xgb.train(params, xg_train, ROUNDS, watchlist, early_stopping_rounds=50)
+
 preds = clr.predict(xgb.DMatrix(x_test))
 
 print("Writing output...")

@@ -18,6 +18,12 @@ y = df_train.is_duplicate.values
 rnnGRUTraining = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru_Train.csv', header=0) 
 rnnGRUTest = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru.csv', header=0) 
 
+#==============================================================================
+# #lstm result 0.24871 vs 0.21525 sans!
+# rnnLstmTraining = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30Train.csv', header=0) 
+# rnnLstmTest = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30.csv', header=0) 
+#==============================================================================
+
 #xg result
 xgTraining = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/xgboost magic abhis/xgb_seed12357_n315training.csv', header=0) 
 xgTest = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/xgboost magic abhis/xgb_seed12357_n315.csv', header=0) 
@@ -30,18 +36,24 @@ xgTest = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/
 #==============================================================================
 
 X = pd.DataFrame()
-X['rnn'] = rnnGRUTraining.is_duplicate
+X['gru'] = rnnGRUTraining.is_duplicate
 X['xg'] = xgTraining.is_duplicate
+#X['lstm'] = rnnLstmTraining.is_duplicate
 
 X_test = pd.DataFrame()
-X_test['rnn'] = rnnGRUTest.is_duplicate
+X_test['gru'] = rnnGRUTest.is_duplicate
 X_test['xg'] = xgTest.is_duplicate
+#X_test['lstm'] = rnnLstmTest.is_duplicate
 
 
 from scipy.stats.stats import pearsonr 
-rnn = X['rnn'].values
+gru = X['gru'].values
 xg = X['xg'].values
-print(np.corrcoef(rnn,xg))
+#lstm = X['lstm'].values
+print(np.corrcoef(gru,xg))
+#print(np.corrcoef(gru,lstm))
+#print(np.corrcoef(lstm,xg))
+
 
 if 1: # Now we oversample the negative class - on your own risk of overfitting!
 	pos_train = X[y == 1]
@@ -60,7 +72,7 @@ if 1: # Now we oversample the negative class - on your own risk of overfitting!
 	y = (np.zeros(len(pos_train)) + 1).tolist() + np.zeros(len(neg_train)).tolist()
 	del pos_train, neg_train
 
-ROUNDS = 800
+ROUNDS = 300
 RS = 12357
 params = {}
 params['objective'] = 'binary:logistic'
