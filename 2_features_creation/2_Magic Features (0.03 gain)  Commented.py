@@ -1,14 +1,24 @@
 # This Python 3 environment comes with many helpful analytics libraries installed
 # It is defined by the kaggle/python docker image: https://github.com/kaggle/docker-python
 # For example, here's several helpful packages to load in 
+laptop = 1
+if laptop == 1:
+    drive = "C"
+else:
+    drive = "F"
 
 import numpy as np
 import pandas as pd
 import timeit
 
 
-train_orig =  pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train.csv', header=0)
-test_orig =  pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test.csv', header=0)
+
+if laptop == 1:
+    train_orig =  pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train.csv', header=0)
+    test_orig =  pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test.csv', header=0)
+else:
+    train_orig =  pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train.csv', header=0)
+    test_orig =  pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test.csv', header=0)
 
 #copy only one column of question for train and test
 tic0=timeit.default_timer()
@@ -61,11 +71,14 @@ comb['q2_freq'] = comb['q2_hash'].map(lambda x: try_apply_dict(x,q1_vc) + try_ap
 train_comb = comb[comb['is_duplicate'] >= 0][['id','q1_hash','q2_hash','q1_freq','q2_freq','is_duplicate']]
 test_comb = comb[comb['is_duplicate'] < 0][['id','q1_hash','q2_hash','q1_freq','q2_freq']]
 
+comb.head()
 
+corr_mat = train_comb.corr()
+corr_mat.head()
+#more frequenct questions are more likely to be duplicates
 
-
-
-
+train_comb[['id', 'q1_freq', 'q2_freq']].to_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_comb.csv') 
+test_comb[['id', 'q1_freq', 'q2_freq']].to_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_comb.csv')
 
 
 

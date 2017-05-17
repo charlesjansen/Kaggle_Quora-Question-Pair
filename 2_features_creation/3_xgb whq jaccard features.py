@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 #https://www.kaggle.com/dasolmar/xgb-with-whq-jaccard/code/code
+laptop = 1
+if laptop == 1:
+    drive = "C"
+else:
+    drive = "F"
 
 import numpy as np
 import pandas as pd
@@ -7,30 +12,28 @@ from collections import Counter
 from nltk.corpus import stopwords
 
 
-input_folder = 'F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/'
-
+input_folder = drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/'
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/32819
 #adding magic features
-train_combine = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_comb.csv', header=0) 
-test_combine = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_comb.csv', header=0) 
+train_combine = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_comb.csv', header=0) 
+test_combine = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_comb.csv', header=0) 
 df_combine = pd.concat([train_combine, test_combine]) 
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/31284
 #https://www.kaggle.com/c/quora-question-pairs/discussion/30224
 #adding Abhishek features
-train_abhis = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_featuresAbhis.csv', encoding = "ISO-8859-1", header=0) 
-test_abhis = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_featuresAbhis.csv', encoding = "ISO-8859-1", header=0) 
+train_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_featuresAbhis.csv', encoding = "ISO-8859-1", header=0) 
+test_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_featuresAbhis.csv', encoding = "ISO-8859-1", header=0) 
 df_abhis = pd.concat([train_abhis, test_abhis]) 
-
 #==============================================================================
 # #rnn 1 lstm
-# train_rnn1Lstm = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30Train.csv', header=0) 
-# test_rnn1Lstm = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30.csv', header=0) 
+# train_rnn1Lstm = pd.read_csv('drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30Train.csv', header=0) 
+# test_rnn1Lstm = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 lstm best results/0.2647_lstm_300_200_0.30_0.30.csv', header=0) 
 # df_rnn1Lstm = pd.concat([train_rnn1Lstm, test_rnn1Lstm]) 
 # #rnn 1 GRU
-# train_rnn1GRU = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru_Train.csv', header=0) 
-# test_rnn1GRU = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru.csv', header=0) 
+# train_rnn1GRU = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru_Train.csv', header=0) 
+# test_rnn1GRU = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/nn 1 gru/0.3143_lstm_300_200_0.50_0.50_gru.csv', header=0) 
 # df_rnn1GRU = pd.concat([train_rnn1GRU, test_rnn1GRU]) 
 #==============================================================================
 
@@ -190,6 +193,22 @@ x['exactly_same'] = (df['question1'] == df['question2']).astype(int)
 print("x duplicated")
 x['duplicated'] = df.duplicated(['question1','question2']).astype(int)
 
+print("x how")
+add_word_count(x, df,'how')
+print("x what")
+add_word_count(x, df,'what')
+print("x which")
+add_word_count(x, df,'which')
+print("x who")
+add_word_count(x, df,'who')
+print("x where")
+add_word_count(x, df,'where')
+print("x when")
+add_word_count(x, df,'when')
+print("x why")
+add_word_count(x, df,'why')
+
+
 #https://www.kaggle.com/c/quora-question-pairs/discussion/32819
 #adding magic features
 print("Magic features")
@@ -197,6 +216,7 @@ print("x q1_freq")
 x['q1_freq'] = df_combine['q1_freq'] 
 print("x q2_freq")
 x['q2_freq'] = df_combine['q2_freq']
+
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/31284
 #https://www.kaggle.com/c/quora-question-pairs/discussion/30224
@@ -246,24 +266,7 @@ print("x kur_q2vec")
 x['kur_q2vec'] = df_abhis['kur_q2vec'] 
 
 
-print("x how")
-add_word_count(x, df,'how')
-print("x what")
-add_word_count(x, df,'what')
-print("x which")
-add_word_count(x, df,'which')
-print("x who")
-add_word_count(x, df,'who')
-print("x where")
-add_word_count(x, df,'where')
-print("x when")
-add_word_count(x, df,'when')
-print("x why")
-add_word_count(x, df,'why')
-
-x.to_csv("F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/x_final_features.csv", index=False)
-
-
+x.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/x_final_features.csv", index=False)
 
 
 

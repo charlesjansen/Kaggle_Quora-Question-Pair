@@ -3,7 +3,12 @@ Detecting duplicate quora questions
 feature engineering
 @author: Abhishek Thakur
 """
-
+laptop = 0
+if laptop == 1:
+    drive = "C"
+else:
+    drive = "F"
+    
 #import cPickle
 import pandas as pd
 import numpy as np
@@ -12,17 +17,17 @@ from fuzzywuzzy import fuzz
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 import nltk
+nltk.download('stopwords')
 #nltk.download('all')
 from tqdm import tqdm
 from scipy.stats import skew, kurtosis
-from scipy.spatial.distance import cosine, cityblock, jaccard, canberra, euclidean, minkowski, braycurtis
+from scipy.spatial.distance import cosine, cityblock, jaccard, canberra, euclidean, minkowski, braycurtis, chebyshev, correlation, sqeuclidean
 stop_words = stopwords.words('english')
 
+TRAIN_DATA_FILE = drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train.csv'
+TEST_DATA_FILE  = drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test.csv'
 
-TRAIN_DATA_FILE = 'F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train.csv'
-TEST_DATA_FILE  = 'F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test.csv'
-
-GOOGLE_DIR = 'F:/DS-main/BigFiles/'
+GOOGLE_DIR = drive + ':/DS-main/BigFiles/'
 EMBEDDING_FILE  =  GOOGLE_DIR + 'GoogleNews-vectors-negative300.bin'
 
 def wmd(s1, s2):
@@ -141,7 +146,21 @@ data['minkowski_distance'] = [minkowski(x, y, 3) for (x, y) in zip(np.nan_to_num
 print("braycurtis_distance")
 data['braycurtis_distance'] = [braycurtis(x, y) for (x, y) in zip(np.nan_to_num(question1_vectors),
                                                           np.nan_to_num(question2_vectors))]
+###moi
+print("chebyshev")
+data['chebyshev_distance'] = [chebyshev(x, y) for (x, y) in zip(np.nan_to_num(question1_vectors),
+                                                          np.nan_to_num(question2_vectors))]
 
+print("correlation")
+data['correlation'] = [correlation(x, y) for (x, y) in zip(np.nan_to_num(question1_vectors),
+                                                          np.nan_to_num(question2_vectors))]
+
+print("sqeuclidean")
+data['sqeuclidean'] = [sqeuclidean(x, y) for (x, y) in zip(np.nan_to_num(question1_vectors),
+                                                          np.nan_to_num(question2_vectors))]     
+    
+    
+#Abhis    
 print("skew_q1vec")
 data['skew_q1vec'] = [skew(x) for x in np.nan_to_num(question1_vectors)]
 print("skew_q2vec")
@@ -150,6 +169,15 @@ print("kur_q1vec")
 data['kur_q1vec'] = [kurtosis(x) for x in np.nan_to_num(question1_vectors)]
 print("kur_q2vec")
 data['kur_q2vec'] = [kurtosis(x) for x in np.nan_to_num(question2_vectors)]
+#moi
+print("kur_Pearson_q1vec")
+data['kur_Pearson_q1vec'] = [kurtosis(x, fisher=False) for x in np.nan_to_num(question1_vectors)]
+print("kur_Pearson_q2vec")
+data['kur_Pearson_q2vec'] = [kurtosis(x, fisher=False) for x in np.nan_to_num(question2_vectors)]
+
+
+
+
 
 #cPickle.dump(question1_vectors, open('data/q1_w2v.pkl', 'wb'), -1)
 #cPickle.dump(question2_vectors, open('data/q2_w2v.pkl', 'wb'), -1)
@@ -258,6 +286,4 @@ dataTest['kur_q2vec'] = [kurtosis(x) for x in np.nan_to_num(question2_vectors)]
 
 #cPickle.dump(question1_vectors_test, open('dataTest/q1_w2v.pkl', 'wb'), -1)
 #cPickle.dump(question2_vectors_test, open('dataTest/q2_w2v.pkl', 'wb'), -1)
-
-dataTest.to_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/featuresAbhishekkrthakurTest.csv', index=False, encoding="utf-8")
-
+dataTest.to_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/featuresAbhishekkrthakurTest.csv', index=False, encoding="utf-8")
