@@ -17,8 +17,8 @@ input_folder = drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data
 #https://www.kaggle.com/c/quora-question-pairs/discussion/32819
 #adding magic features
 print("loading magic features")
-train_combine = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_comb.csv', header=0) 
-test_combine = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_comb.csv', header=0) 
+train_combine = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_comb_spacy_cleaned.csv', header=0) 
+test_combine = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_comb_spacy_cleaned.csv', header=0) 
 df_combine = pd.concat([train_combine, test_combine]) 
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/31284
@@ -27,21 +27,21 @@ df_combine = pd.concat([train_combine, test_combine])
 #train_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_featuresAbhis.csv', encoding = "ISO-8859-1", header=0) 
 #test_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_featuresAbhis.csv', encoding = "ISO-8859-1", header=0) 
 print("loading my extended abhi whq features")
-train_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/featuresAbhishekkrthakurTrain.csv', header=0) 
-test_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/featuresAbhishekkrthakurTest.csv', header=0) 
+train_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/featuresAbhishekkrthakurTrain_spacy_cleaned.csv', header=0) 
+test_abhis = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/featuresAbhishekkrthakurTest_spacy_cleaned.csv', header=0) 
 df_abhis = pd.concat([train_abhis, test_abhis]) 
 
 #magic2
 print("loading magic2")
-train_mgc2 = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_magic2.csv', header=0) 
-test_mgc2  = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_magic2.csv', header=0)
+train_mgc2 = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_magic2_spacy_cleaned.csv', header=0) 
+test_mgc2  = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_magic2_spacy_cleaned.csv', header=0)
 df_mgc2 = pd.concat([train_mgc2, test_mgc2]) 
 
 
 #myMagic3
 print("loading myMagic")
-train_mgc3 = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_myMagic.csv', header=0) 
-test_mgc3  = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_myMagic.csv', header=0)
+train_mgc3 = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/train_myMagic3_spacy_cleaned.csv', header=0) 
+test_mgc3  = pd.read_csv(drive + ':/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/test_myMagic3_spacy_cleaned.csv', header=0)
 df_mgc3 = pd.concat([train_mgc3, test_mgc3])
 
 
@@ -59,8 +59,8 @@ def add_word_count(x, df, word):
 
 
 
-df_train = pd.read_csv(input_folder + 'train.csv')
-df_test  = pd.read_csv(input_folder + 'test.csv')
+df_train = pd.read_csv(input_folder + 'train_spacy_cleaned.csv')
+df_test  = pd.read_csv(input_folder + 'test_spacy_cleaned.csv')
 
 print("Original data: X_train: {}, X_test: {}".format(df_train.shape, df_test.shape))
 print("Features processing, be patient...")
@@ -207,13 +207,6 @@ add_word_count(x, df,'why')
 #df_combine.reset_index()
 
 
-#https://www.kaggle.com/c/quora-question-pairs/discussion/32819
-#adding magic features
-print("Magic features")
-print("x q1_freq")
-x['q1_freq'] = df_combine['q1_freq'] 
-print("x q2_freq")
-x['q2_freq'] = df_combine['q2_freq']
 
 
 #https://www.kaggle.com/c/quora-question-pairs/discussion/31284
@@ -290,7 +283,14 @@ print("x tmean_q1vec")
 x['tmean_q1vec'] = df_abhis['tmean_q1vec'] 
 print("x tmean_q2vec")
 x['tmean_q2vec'] = df_abhis['tmean_q2vec'] 
-
+print("tstd_q1vec")
+x['tstd_q1vec'] = df_abhis['tstd_q1vec']
+print("tstd_q2vec")
+x['tstd_q2vec'] = df_abhis['tstd_q2vec']
+print("jarque_bera_q1vec")
+x['jarque_bera_q1vec'] = df_abhis['jarque_bera_q1vec']
+print("jarque_bera_q2vec")
+x['jarque_bera_q2vec'] = df_abhis['jarque_bera_q2vec']
 
 
 #==============================================================================
@@ -299,6 +299,14 @@ x['tmean_q2vec'] = df_abhis['tmean_q2vec']
 print("x q1_q2_intersect")
 x['q1_q2_intersect'] = df_mgc2['q1_q2_intersect']
 
+
+#https://www.kaggle.com/c/quora-question-pairs/discussion/32819
+#adding magic features
+print("Magic features")
+print("x q1_freq")
+x['q1_freq'] = df_combine['q1_freq'] 
+print("x q2_freq")
+x['q2_freq'] = df_combine['q2_freq']
 
 #==============================================================================
 # #adding my magic
@@ -316,16 +324,10 @@ x['diffAvgWordID'] = df_mgc3['diffAvgWordID']
 print("diffRarestWordID")
 x['diffRarestWordID'] = df_mgc3['diffRarestWordID']
 
-
-
-
-
-
-#low removed (bad idea)
-#x = x.drop(['where_both', 'sqeuclidean', 'euclidean_distance', 'when_both', "q2_where", "which_both", "q1_when", "q2_when", "who_both", "q1_who", "q1_where", "q2_who", "q2_which", "q1_which", "why_both", "how_both", "q2_why", "what_both", "q1_why", "q2_what"], axis=1)
+print("saving")
 
 #x.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/x_final_features_extendedMagic2.csv", index=False)
-x.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/x_final_features_MyMagic3.csv", index=False)
+x.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/x_final_features_spacy_cleaned.csv", index=False)
 
 
 

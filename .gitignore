@@ -3,3 +3,5 @@
 *.csv
 .ipnb_checkpoints
 floyd
+bigrame_spacy_bigrame
+trigram_spacy_bigrame

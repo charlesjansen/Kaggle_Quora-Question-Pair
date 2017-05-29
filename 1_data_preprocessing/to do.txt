@@ -1,9 +1,12 @@
 one only file to create the feature
 same preprocessing for all
 
+remove nan
+
 textacy for abrev http://textacy.readthedocs.io/en/latest/_modules/textacy/preprocess.html
 
 lemmatizer, for verbs mainly (trying to get the english like chinese, no conj, no plur)
+(still good for rnn)
 
 gensim bigram trigram on top  http://stackoverflow.com/questions/35716121/how-to-extract-phrases-from-corpus-using-gensim   ;   
 https://www.google.com.ar/search?q=gensim+phrase+modeling&oq=gensim+phrase+modeling&aqs=chrome..69i57.4079j0j9&sourceid=chrome&ie=UTF-8
@@ -13,3 +16,10 @@ for features mainly (it might affect rnn with less matching for word2vec)
 
 spacy features
 more features
+
+
+
+apres ca
+refaire model layer 2 normal
+apres layer2 avec les donnés sans preprocessing
+apres avec data inicial en plus 

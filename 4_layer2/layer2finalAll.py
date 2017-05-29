@@ -12,10 +12,7 @@ import pandas as pd
 import xgboost as xgb
 import operator
 from sklearn.model_selection import train_test_split
-from collections import Counter
-from nltk.corpus import stopwords
 import matplotlib.pyplot as plt
-from pylab import plot, show, subplot, specgram, imshow, savefig
 from sklearn.model_selection import KFold
 K = 5
 kf = KFold(n_splits = K)
@@ -79,8 +76,8 @@ x_train['xg'] = xgTraining.is_duplicate
 x_train['ANN'] = ANNTraining.is_duplicate
 x_train['gru'] = rnnGRUTraining.is_duplicate
 x_train['xg_spacy'] = xgTraining_spacy.is_duplicate
-x_train'] = ANNTraining_spacy.is_duplicate
-x_trainx['gbm_spacy'] = gbmTraining_spacy.is_duplicate
+x_train['ANN_spacy'] = ANNTraining_spacy.is_duplicate
+x_train['gbm_spacy'] = gbmTraining_spacy.is_duplicate
 
 
 x_test_real['xg'] = xgTest.is_duplicate
@@ -108,13 +105,11 @@ c =x_train.corr()
 
 
 
-print(x.columns)
-print(x.describe())
 
 feature_names = list(x_train.columns.values)
 print("Features: {}".format(feature_names))
 
-ROUNDS = 20000
+ROUNDS = 550
 RS = 12357
 params = {}
 params['scale_pos_weight'] = 0.36 #https://www.kaggle.com/c/quora-question-pairs/discussion/31179   same LB as if = 1 above
