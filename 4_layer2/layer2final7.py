@@ -69,7 +69,7 @@ preprocessing = "spacy_cleaned_7_"
 x = pd.DataFrame()
 x['xg'] = xgTraining.is_duplicate
 x['ANN'] = ANNTraining.is_duplicate
-x['gru'] = rnnGRUTraining.is_duplicate
+#x['gru'] = rnnGRUTraining.is_duplicate
 x['xg_spacy'] = xgTraining_spacy.is_duplicate
 x['ANN_spacy'] = ANNTraining_spacy.is_duplicate
 x['gbm_spacy'] = gbmTraining_spacy.is_duplicate
@@ -80,7 +80,7 @@ x['LSTM'] = rnnLSTMTraining.is_duplicate
 x_test = pd.DataFrame()
 x_test['xg'] = xgTest.is_duplicate
 x_test['ANN'] = ANNTest.is_duplicate
-x_test['gru'] = rnnGRUTest.is_duplicate
+#x_test['gru'] = rnnGRUTest.is_duplicate
 x_test['xg_spacy'] = xgTest_spacy.is_duplicate
 x_test['ANN_spacy'] = ANNTest_spacy.is_duplicate
 x_test['gbm_spacy'] = gbmTest_spacy.is_duplicate 
@@ -88,10 +88,9 @@ x_test['LSTM'] = rnnLSTMTest.is_duplicate
 
 
 
-gru = x['gru'].values
 xg = x['xg'].values
 ANN = x['ANN'].values
-gru = x['gru'].values
+#gru = x['gru'].values
 xg_spacy = x['xg_spacy'].values
 ANN_spacy = x['ANN_spacy'].values
 gbm_spacy = x['gbm_spacy'].values
@@ -100,7 +99,7 @@ LSTM = x['LSTM'].values
 
 
 
-corrcoef = np.corrcoef(ANN,[LSTM, gru, xg, gbm_spacy, ANN_spacy, xg_spacy])
+#corrcoef = np.corrcoef(ANN,[LSTM, gru, xg, gbm_spacy, ANN_spacy, xg_spacy])
 
 
 

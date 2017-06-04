@@ -1,7 +1,6 @@
 0	xg	q
 1	ANN	q
-2	gru	q
-3	xg_spacy	q
-4	ANN_spacy	q
-5	gbm_spacy	q
-6	LSTM	q
+2	xg_spacy	q
+3	ANN_spacy	q
+4	gbm_spacy	q
+5	LSTM	q

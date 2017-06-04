@@ -92,73 +92,75 @@ x_train_real =  x_train
 labels_real =  labels
 del x, df_train
 
-
-####################################################################
-# LightGBM
-####################################################################
-import lightgbm as lgb
-
-params2 = {
-    'task': 'train',
-    'boosting_type': 'gbdt',
-    'objective': 'regression',
-    'metric': {'binary_logloss'},
-    'num_leaves': 128,
-    'learning_rate': 0.02,
-    'feature_fraction': 0.6,
-    'bagging_fraction': 0.6,
-    'bagging_freq': 3,
-    'verbose': 1
-}
-
-
-###KFold
-stacking_train = np.empty(shape=(len(labels_real)))
-stacking_test = np.empty(shape=(len(x_test_real),K))
-for kth, (train_index, test_index) in enumerate(kf.split(x_train_real)):
-    print("\n********************** FOLD ", kth+1, " ******************\n")
-    max_idx_test  = np.amax(test_index)+1
-    min_idx_test  = np.amin(test_index)
-    max_idx_train = np.amax(train_index)+1
-    min_idx_train = np.amin(train_index)
-    X_training, X_val, labels_training, labels_val = train_test_split(x_train[min_idx_train:max_idx_train], labels[min_idx_train:max_idx_train], test_size=0.2)#, random_state=RS)
-    lgb_train = lgb.Dataset(X_training, labels_training)
-    lgb_eval = lgb.Dataset(X_val, labels_val, reference=lgb_train)
-    gbm = lgb.train(params2,
-                    lgb_train,
-                    num_boost_round=10000,
-                    valid_sets=lgb_eval,
-                    early_stopping_rounds=100)
-    print('Save model...')
-    # save model to file
-    #gbm.save_model('gbm_model.txt')
-    #predict training ids of the testing fold
-    print('Start predicting...')
-    # predict
-    stacking_train[min_idx_test:max_idx_test] = gbm.predict(x_train[min_idx_test:max_idx_test], num_iteration=gbm.best_iteration)
-    #pred test
-    stacking_test[:,kth] = gbm.predict(x_test_real, num_iteration=gbm.best_iteration)
-del max_idx_test, min_idx_test, max_idx_train, min_idx_train, X_training, X_val, labels_training, labels_val
-    
-
-#pred average
-preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4])/5
-#Saving 
-print("Writing output...")
-sub = pd.DataFrame()
-sub['test_id'] = df_test['test_id']
-sub['is_duplicate'] = preds
-sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_test" + preprocessing  + ".csv", index=False)
-
-#--- pred training for ensemble
-print("Writing training pred output...")
-sub = pd.DataFrame()
-sub['is_duplicate'] = stacking_train 
-sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_train" + preprocessing  + ".csv", index=False)
-
-del stacking_test, stacking_train, gbm
-
-
+#==============================================================================
+# 
+# ####################################################################
+# # LightGBM
+# ####################################################################
+# import lightgbm as lgb
+# 
+# params2 = {
+#     'task': 'train',
+#     'boosting_type': 'gbdt',
+#     'objective': 'regression',
+#     'metric': {'binary_logloss'},
+#     'num_leaves': 128,
+#     'learning_rate': 0.02,
+#     'feature_fraction': 0.6,
+#     'bagging_fraction': 0.6,
+#     'bagging_freq': 3,
+#     'verbose': 1
+# }
+# 
+# 
+# ###KFold
+# stacking_train = np.empty(shape=(len(labels_real)))
+# stacking_test = np.empty(shape=(len(x_test_real),K))
+# for kth, (train_index, test_index) in enumerate(kf.split(x_train_real)):
+#     print("\n********************** FOLD ", kth+1, " ******************\n")
+#     max_idx_test  = np.amax(test_index)+1
+#     min_idx_test  = np.amin(test_index)
+#     max_idx_train = np.amax(train_index)+1
+#     min_idx_train = np.amin(train_index)
+#     X_training, X_val, labels_training, labels_val = train_test_split(x_train[min_idx_train:max_idx_train], labels[min_idx_train:max_idx_train], test_size=0.2)#, random_state=RS)
+#     lgb_train = lgb.Dataset(X_training, labels_training)
+#     lgb_eval = lgb.Dataset(X_val, labels_val, reference=lgb_train)
+#     gbm = lgb.train(params2,
+#                     lgb_train,
+#                     num_boost_round=10000,
+#                     valid_sets=lgb_eval,
+#                     early_stopping_rounds=100)
+#     print('Save model...')
+#     # save model to file
+#     #gbm.save_model('gbm_model.txt')
+#     #predict training ids of the testing fold
+#     print('Start predicting...')
+#     # predict
+#     stacking_train[min_idx_test:max_idx_test] = gbm.predict(x_train[min_idx_test:max_idx_test], num_iteration=gbm.best_iteration)
+#     #pred test
+#     stacking_test[:,kth] = gbm.predict(x_test_real, num_iteration=gbm.best_iteration)
+# del max_idx_test, min_idx_test, max_idx_train, min_idx_train, X_training, X_val, labels_training, labels_val
+#     
+# 
+# #pred average
+# preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4] + stacking_test[:,5] + stacking_test[:,6] + stacking_test[:,7] + stacking_test[:,8] + stacking_test[:,9])/10
+# #Saving 
+# print("Writing output...")
+# sub = pd.DataFrame()
+# sub['test_id'] = df_test['test_id']
+# sub['is_duplicate'] = preds
+# sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_test" + preprocessing  + ".csv", index=False)
+# 
+# #--- pred training for ensemble
+# print("Writing training pred output...")
+# sub = pd.DataFrame()
+# sub['is_duplicate'] = stacking_train 
+# sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_train" + preprocessing  + ".csv", index=False)
+# 
+# del stacking_test, stacking_train, gbm
+# 
+# 
+#==============================================================================
 
 
 
@@ -249,7 +251,7 @@ del max_idx_test, min_idx_test, max_idx_train, min_idx_train, ratio, X_training,
 
 #Saving 
 #pred average
-preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4])/5
+preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4] + stacking_test[:,5] + stacking_test[:,6] + stacking_test[:,7] + stacking_test[:,8] + stacking_test[:,9])/10
 
 print("Features importances...")
 importance = clr.get_fscore(fmap='xgb.fmap')
@@ -312,69 +314,89 @@ x_test_real = ss.transform(x_test_real)
 
 
 
-####################################################################
-# ANN
-####################################################################
-# Importing the Keras libraries and packages
-import keras
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Dropout
-from keras.layers.normalization import BatchNormalization
-from keras.callbacks import EarlyStopping, ModelCheckpoint
 
-stacking_train = np.empty(shape=(len(labels_real)))
-stacking_test = np.empty(shape=(len(x_test_real),K))
-for kth, (train_index, test_index) in enumerate(kf.split(x_train_real)):    
-    print("\n********************** FOLD ", kth+1, " ******************\n")
-    max_idx_test  = np.amax(test_index)+1
-    min_idx_test  = np.amin(test_index)
-    max_idx_train = np.amax(train_index)+1
-    min_idx_train = np.amin(train_index)
 
-    # Initialising the ANN
-    classifier = Sequential()
-    # Adding the input layer and the first hidden layer
-    classifier.add(Dense(units = 300, kernel_initializer = 'truncated_normal', activation='relu', input_dim = x_train_real.shape[1]))
-    classifier.add(Dropout(rate = 0.3))
-    classifier.add(BatchNormalization())
-    
-    classifier.add(Dense(200, kernel_initializer = 'truncated_normal', activation='relu'))
-    classifier.add(Dropout(rate = 0.3))
-    classifier.add(BatchNormalization())
-    
-    classifier.add(Dense(200, kernel_initializer = 'truncated_normal', activation='relu'))
-    classifier.add(Dropout(rate = 0.3))
-    classifier.add(BatchNormalization())
-    
-    classifier.add(Dense(units = 1, kernel_initializer = 'truncated_normal', activation = 'sigmoid'))
-    
-    early_stopping =EarlyStopping(monitor='val_loss', patience = 20)
-    model_checkpoint = ModelCheckpoint('weightsANN_X_final_Features_MyMagic3.h5', save_best_only=True, save_weights_only=True, verbose=1)
-    
-    classifier.compile(optimizer = 'nadam', loss = 'binary_crossentropy', metrics = ['accuracy'])
-    classifier.fit(x_train_real[min_idx_train:max_idx_train], labels[min_idx_train:max_idx_train], batch_size=4096, epochs=300, verbose=1, validation_split=0.1, shuffle=True, callbacks=[early_stopping, model_checkpoint])
-    
-    classifier.load_weights('weightsANN_X_final_Features_MyMagic3.h5')
-    #predict training ids of the testing fold
-    stacking_train[min_idx_test:max_idx_test] = classifier.predict(x_train_real[min_idx_test:max_idx_test], batch_size=4096, verbose=1)[:,0]
-    #pred test
-    stacking_test[:,kth] = classifier.predict(x_test_real, batch_size=4096, verbose=1)[:,0]
 
-#Saving 
-#pred test
-preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4])/5
-print("Writing output...")
-sub = pd.DataFrame()
-sub['test_id'] = df_test['test_id']
-sub['is_duplicate'] = preds
-sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_test" + preprocessing  + ".csv", index=False)
 
-#--- pred training for ensemble
-print("Writing training pred output...")
-sub = pd.DataFrame()
-sub['is_duplicate'] = stacking_train
-sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_train" + preprocessing  + ".csv", index=False)
+
+#==============================================================================
+# 
+# 
+# ####################################################################
+# # ANN
+# ####################################################################
+# # Importing the Keras libraries and packages
+# import keras
+# from keras.models import Sequential
+# from keras.layers import Dense
+# from keras.layers import Dropout
+# from keras.layers.normalization import BatchNormalization
+# from keras.callbacks import EarlyStopping, ModelCheckpoint
+# 
+# stacking_train = np.empty(shape=(len(labels_real)))
+# stacking_test = np.empty(shape=(len(x_test_real),K))
+# for kth, (train_index, test_index) in enumerate(kf.split(x_train_real)):    
+#     print("\n********************** FOLD ", kth+1, " ******************\n")
+#     max_idx_test  = np.amax(test_index)+1
+#     min_idx_test  = np.amin(test_index)
+#     max_idx_train = np.amax(train_index)+1
+#     min_idx_train = np.amin(train_index)
+# 
+#     # Initialising the ANN
+#     classifier = Sequential()
+#     # Adding the input layer and the first hidden layer
+#     classifier.add(Dense(units = 300, kernel_initializer = 'truncated_normal', activation='relu', input_dim = x_train_real.shape[1]))
+#     classifier.add(Dropout(rate = 0.3))
+#     classifier.add(BatchNormalization())
+#     
+#     classifier.add(Dense(200, kernel_initializer = 'truncated_normal', activation='relu'))
+#     classifier.add(Dropout(rate = 0.3))
+#     classifier.add(BatchNormalization())
+#     
+#     classifier.add(Dense(200, kernel_initializer = 'truncated_normal', activation='relu'))
+#     classifier.add(Dropout(rate = 0.3))
+#     classifier.add(BatchNormalization())
+#     
+#     classifier.add(Dense(units = 1, kernel_initializer = 'truncated_normal', activation = 'sigmoid'))
+#     
+#     early_stopping =EarlyStopping(monitor='val_loss', patience = 20)
+#     model_checkpoint = ModelCheckpoint('weightsANN_X_final_Features_MyMagic3.h5', save_best_only=True, save_weights_only=True, verbose=1)
+#     
+#     classifier.compile(optimizer = 'nadam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+#     classifier.fit(x_train_real[min_idx_train:max_idx_train], labels[min_idx_train:max_idx_train], batch_size=4096, epochs=300, verbose=1, validation_split=0.1, shuffle=True, callbacks=[early_stopping, model_checkpoint])
+#     
+#     classifier.load_weights('weightsANN_X_final_Features_MyMagic3.h5')
+#     #predict training ids of the testing fold
+#     stacking_train[min_idx_test:max_idx_test] = classifier.predict(x_train_real[min_idx_test:max_idx_test], batch_size=4096, verbose=1)[:,0]
+#     #pred test
+#     stacking_test[:,kth] = classifier.predict(x_test_real, batch_size=4096, verbose=1)[:,0]
+#     del classifier
+# 
+# #Saving 
+# #pred test
+# preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4] + stacking_test[:,5] + stacking_test[:,6] + stacking_test[:,7] + stacking_test[:,8] + stacking_test[:,9])/10
+# print("Writing output...")
+# sub = pd.DataFrame()
+# sub['test_id'] = df_test['test_id']
+# sub['is_duplicate'] = preds
+# sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_test" + preprocessing  + ".csv", index=False)
+# 
+# #--- pred training for ensemble
+# print("Writing training pred output...")
+# sub = pd.DataFrame()
+# sub['is_duplicate'] = stacking_train
+# sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_train" + preprocessing  + ".csv", index=False)
+# 
+# 
+#==============================================================================
+
+
+
+
+
+
+
+
 
 
 
@@ -528,7 +550,7 @@ data_1_dbl = np.vstack((data_1, data_2))
 data_2_dbl = np.vstack((data_2, data_1))
 labels_dbl = np.concatenate((labels, labels))
 
-K = 3
+K = 5
 kf = KFold(n_splits = K)
 
 
@@ -619,7 +641,7 @@ for kth, (train_index, test_index) in enumerate(kf.split(data_1_dbl)):
     stacking_test[:,kth] = model.predict([test_data_1, test_data_2], batch_size=batch_size, verbose=1)[:,0]
     stacking_test[:,kth] += model.predict([test_data_2, test_data_1], batch_size=batch_size, verbose=1)[:,0]
     stacking_test[:,kth] /= 2
-
+    del model
 
 #Saving 
 #pred test
@@ -754,7 +776,7 @@ for kth, (train_index, test_index) in enumerate(kf.split(data_1_dbl)):
     stacking_test[:,kth] = model.predict([test_data_1, test_data_2], batch_size=128, verbose=1)[:,0]
     stacking_test[:,kth] += model.predict([test_data_2, test_data_1], batch_size=128, verbose=1)[:,0]
     stacking_test[:,kth] /= 2
-
+    del model
 
 #Saving 
 #pred test
@@ -962,7 +984,7 @@ data_2_dbl = np.vstack((data_2, data_1))
 labels_dbl = np.concatenate((labels, labels))
 
 
-K = 3
+K = 5
 kf = KFold(n_splits = K)
 
 
@@ -1037,7 +1059,7 @@ for kth, (train_index, test_index) in enumerate(kf.split(data_1_dbl)):
     
     early_stopping =EarlyStopping(monitor='val_loss', patience=3)
     bst_model_path = STAMP + '.h5'
-    model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_weights_only=True)
+    model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_weights_only=True, verbose=1)
     batch_size = 256
     hist = model.fit([data_1_dbl[min_idx_train:max_idx_train], data_2_dbl[min_idx_train:max_idx_train]], labels_dbl[min_idx_train:max_idx_train], \
             validation_data=([data_1_dbl[min_idx_test:max_idx_test], data_2_dbl[min_idx_test:max_idx_test]], labels_dbl[min_idx_test:max_idx_test], weight_val), \
@@ -1056,13 +1078,17 @@ for kth, (train_index, test_index) in enumerate(kf.split(data_1_dbl)):
     stacking_test[:,kth] = model.predict([test_data_1, test_data_2], batch_size=batch_size, verbose=1)[:,0]
     stacking_test[:,kth] += model.predict([test_data_2, test_data_1], batch_size=batch_size, verbose=1)[:,0]
     stacking_test[:,kth] /= 2
+    del model
+    
+    
+    
 ########################################
 ## make the submission
 ########################################
 
 #Saving 
 #pred test
-preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2])/3
+preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4])/5
 print("Writing output...")
 sub = pd.DataFrame()
 sub['test_id'] = df_test['test_id']
@@ -1074,6 +1100,18 @@ print("Writing training pred output...")
 sub = pd.DataFrame()
 sub['is_duplicate'] = stacking_train
 sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/newLystdo_train_kf3_" + preprocessing  + "epochsPatience3.csv", index=False)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1241,7 +1279,7 @@ labels_dbl = np.concatenate((labels, labels))
 x_train_real_dlb = np.concatenate((x_train_real, x_train_real))
 
 
-K = 3
+K = 5
 kf = KFold(n_splits = K)
 
 
@@ -1345,6 +1383,8 @@ for kth, (train_index, test_index) in enumerate(kf.split(data_1_dbl)):
     stacking_test[:,kth] = model.predict([test_data_1, test_data_2, x_test_real], batch_size=batch_size, verbose=1)[:,0]
     stacking_test[:,kth] += model.predict([test_data_2, test_data_1, x_test_real], batch_size=batch_size, verbose=1)[:,0]
     stacking_test[:,kth] /= 2
+    
+    del model
 ########################################
 ## make the submission
 ########################################
