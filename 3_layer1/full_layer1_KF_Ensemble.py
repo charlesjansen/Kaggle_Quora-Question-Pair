@@ -100,31 +100,38 @@ del x, df_train
 ################################################
 #layers1  models loading
 
-name="ann50"
-print(name)
-Training = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_train_spacy_cleaned_kf10_neurones_50_kf10.csv.csv', header=0) 
-Test = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_test_spacy_cleaned_kf10_neurones_50_kf10.csv.csv', header=0) 
-x_train_real[name] = Training.is_duplicate
-x_test_real[name] = Test.is_duplicate
-
-name="linReg"
-print(name)
-Training = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/linReg_train_kf10.csv', header=0) 
-Test = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/linReg_test_kf10.csv', header=0) 
-x_train_real[name] = Training.is_duplicate
-x_test_real[name] = Test.is_duplicate
-
-name="linReg"
-print(name)
-Training = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_train_spacy_cleaned_kf10_kf10.csv', header=0) 
-Test = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_test_spacy_cleaned_kf10_kf10.csv', header=0) 
-x_train_real[name] = Training.is_duplicate
-x_test_real[name] = Test.is_duplicate
-
-
-
-
-
+#==============================================================================
+# name="ann50"
+# print(name)
+# Training = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_train_spacy_cleaned_kf10_neurones_50_kf10.csv', header=0) 
+# Test = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/ANN_test_spacy_cleaned_kf10_neurones_50_kf10.csv', header=0) 
+# x_train_real[name] = Training.is_duplicate
+# x_test_real[name] = Test.is_duplicate
+# 
+# name="linReg"
+# print(name)
+# Training = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/linReg_train_kf10.csv', header=0) 
+# Test = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/linReg_test_kf10.csv', header=0) 
+# x_train_real[name] = Training.is_duplicate
+# x_test_real[name] = Test.is_duplicate
+# 
+# name="lightgbm"
+# print(name)
+# Training = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_train_spacy_cleaned_kf10_kf10.csv', header=0) 
+# Test = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/lightgbm_test_spacy_cleaned_kf10_kf10.csv', header=0) 
+# x_train_real[name] = Training.is_duplicate
+# x_test_real[name] = Test.is_duplicate
+# 
+# name="xg_seul"
+# print(name)
+# Training = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/xgb_gbtree_train_spacy_cleaned_kf10_1000normal.csv', header=0) 
+# Test = pd.read_csv('F:/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/xgb_gbtree_test_spacy_cleaned_kf10_1000normal.csv', header=0) 
+# x_train_real[name] = Training.is_duplicate
+# x_test_real[name] = Test.is_duplicate
+# 
+# 
+# 
+#==============================================================================
 
 
 
@@ -135,7 +142,7 @@ x_test_real[name] = Test.is_duplicate
 # preprocessing Imputer
 ####################################################################
 
-
+print("imputer")
 from sklearn.preprocessing import Imputer
 x_train_real = Imputer().fit_transform(x_train_real)
 x_test_real = Imputer().fit_transform(x_test_real)
@@ -202,7 +209,7 @@ params['silent'] = 1
 #==============================================================================
 print("Training data: X_train: {}, labels: {}, X_test: {}".format(x_train_real.shape, len(labels), x_test_real.shape))
 
-ROUNDS = 1000
+ROUNDS = 2000
 
 
 #training
@@ -232,17 +239,18 @@ for kth, (train_index, test_index) in enumerate(kf.split(x_train_real, labels_re
     stacking_train[test_index] = clr.predict(xgb.DMatrix(x_train_real[test_index]))
     #pred test
     stacking_test[:,kth] = clr.predict(xgb.DMatrix(x_test_real))
+    print("Features importances...")
+    importance = clr.get_fscore(fmap=drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/xgb.fmap")
+    importance = sorted(importance.items(), key=operator.itemgetter(1))
+    ft = pd.DataFrame(importance, columns=['feature', 'fscore'])
+    ft.plot(kind='barh', x='feature', y='fscore', legend=False, figsize=(10, 25))
+    plt.gcf().savefig(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/xgb_gbtree_test" + preprocessing  + "_fold" + str(kth+1) + ".png")
        
 #Saving 
 #pred average
 preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4] + stacking_test[:,5] + stacking_test[:,6] + stacking_test[:,7] + stacking_test[:,8] + stacking_test[:,9])/10
 
-print("Features importances...")
-importance = clr.get_fscore(fmap=drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/xgb.fmap")
-importance = sorted(importance.items(), key=operator.itemgetter(1))
-ft = pd.DataFrame(importance, columns=['feature', 'fscore'])
-ft.plot(kind='barh', x='feature', y='fscore', legend=False, figsize=(10, 25))
-plt.gcf().savefig(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/xgb_gbtree_test" + preprocessing  + "_" + str(kth) + ".png")
+
     
 print("Writing output...")
 sub = pd.DataFrame()
@@ -603,7 +611,7 @@ sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/lay
 print("Random Forest")
 from sklearn.ensemble import RandomForestRegressor
 
-trees = 100
+trees = 200
 stacking_train = np.empty(shape=(len(labels_real)))
 stacking_test = np.empty(shape=(len(x_test_real),K))
 for kth, (train_index, test_index) in enumerate(kf.split(x_train_real, labels_real)):    
@@ -638,13 +646,13 @@ print("Writing output...")
 sub = pd.DataFrame()
 sub['test_id'] = df_test['test_id']
 sub['is_duplicate'] = preds
-sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/RF_test_"+trees+"_Reg_kf10.csv", index=False)
+sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/RF_test_"+str(trees)+"_Reg_kf10.csv", index=False)
 
 #--- pred training for ensemble
 print("Writing training pred output...")
 sub = pd.DataFrame()
 sub['is_duplicate'] = stacking_train
-sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/RF_train_"+trees+"_Reg_kf10.csv", index=False)
+sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/layer1Features/RF_train_"+str(trees)+"_Reg_kf10.csv", index=False)
 
 
 
@@ -669,7 +677,7 @@ sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/lay
 # ANN
 ####################################################################
 # Importing the Keras libraries and packages
-neurones = 100
+neurones = 400
 
 from keras.models import Sequential
 from keras.layers import Dense
@@ -1015,7 +1023,6 @@ sub.to_csv(drive + ":/DS-main/Kaggle-main/Quora Question Pairs - inputs/data/lay
 
 
 
-
 ####################################################################
 # LSTM
 ####################################################################
@@ -1219,7 +1226,7 @@ for kth, (train_index, test_index) in enumerate(kf.split(data_1_dbl)):
     #model.summary()
     print(STAMP)
     
-    early_stopping =EarlyStopping(monitor='val_loss', patience=5)
+    early_stopping =EarlyStopping(monitor='val_loss', patience=3)
     bst_model_path = STAMP + 'dblLSTM.h5'
     model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_weights_only=True, verbose=1)
     
@@ -1843,7 +1850,7 @@ for kth, (train_index, test_index) in enumerate(kf.split(data_1_dbl)):
 
 #Saving 
 #pred test
-preds = (stacking_test[:,0] + stacking_test[:,1] + stacking_test[:,2] + stacking_test[:,3] + stacking_test[:,4])/5
+preds = (stacking_test[:,0] + stacking_test[:,1] )/2
 print("Writing output...")
 sub = pd.DataFrame()
 sub['test_id'] = df_test['test_id']
