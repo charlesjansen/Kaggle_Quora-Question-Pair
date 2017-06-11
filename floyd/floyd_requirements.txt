@@ -1,0 +1,4 @@
+nltk
+gensim
+--upgrade Keras
+spacy
